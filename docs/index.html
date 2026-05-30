@@ -29,7 +29,7 @@
                     <a href="#features">Features</a>
                     <a href="#quickstart">Quick Start</a>
                     <a href="#examples">Examples</a>
-                    <a href="https://lastfm-proxy-worker.guitaripod.workers.dev/api/docs" target="_blank">API Docs</a>
+                    <a href="https://github.com/guitaripod/lastfm-rs/blob/master/openapi.yaml" target="_blank">API Docs</a>
                     <a href="https://github.com/guitaripod/lastfm-rs" class="github-link">
                         <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
                             <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
@@ -55,7 +55,7 @@
                 </p>
                 <div class="hero-actions">
                     <a href="#quickstart" class="btn btn-primary">Get Started</a>
-                    <a href="https://lastfm-proxy-worker.guitaripod.workers.dev/api/docs" class="btn btn-secondary" target="_blank">
+                    <a href="https://github.com/guitaripod/lastfm-rs/blob/master/openapi.yaml" class="btn btn-secondary" target="_blank">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
@@ -176,7 +176,7 @@ lastfm-cli auth status</code></pre>
                     
                     <div class="cli-output active" id="demo-recent">
                         <div class="cli-command">$ lastfm-cli my recent-tracks --limit 5</div>
-                        <pre class="cli-result"><span class="cli-header">🎵 Recent Tracks for guitaripod</span>
+                        <pre class="cli-result"><span class="cli-header">🎵 Recent Tracks for rj</span>
 
 <span class="cli-track">1. <span class="cli-song">Paranoid Android</span> • <span class="cli-artist">Radiohead</span>
    <span class="cli-album">OK Computer</span> • <span class="cli-time">2 minutes ago</span>
@@ -368,10 +368,10 @@ groups, they were distinguished for their extended compositions...
                     </div>
                     
                     <div class="cli-output" id="demo-compare">
-                        <div class="cli-command">$ lastfm-cli tasteometer compare "guitaripod" "musiclover92"</div>
+                        <div class="cli-command">$ lastfm-cli tasteometer compare "rj" "musiclover92"</div>
                         <pre class="cli-result"><span class="cli-header">🎵 Music Compatibility</span>
 
-<span class="cli-compare">guitaripod</span> 🤝 <span class="cli-compare">musiclover92</span>
+<span class="cli-compare">rj</span> 🤝 <span class="cli-compare">musiclover92</span>
 
 <span class="cli-match-score">78.4%</span> <span class="cli-info">SUPER</span>
 
@@ -382,7 +382,7 @@ groups, they were distinguished for their extended compositions...
 • <span class="cli-artist">Led Zeppelin</span>
 • <span class="cli-artist">David Bowie</span>
 
-<span class="cli-section">Unique to guitaripod:</span>
+<span class="cli-section">Unique to rj:</span>
 <span class="cli-artist">King Crimson</span>, <span class="cli-artist">Yes</span>, <span class="cli-artist">Genesis</span>
 
 <span class="cli-section">Unique to musiclover92:</span>
@@ -445,7 +445,7 @@ groups, they were distinguished for their extended compositions...
                     </div>
                 </div>
                 <div class="api-cta">
-                    <a href="https://lastfm-proxy-worker.guitaripod.workers.dev/api/docs" class="btn btn-primary btn-large" target="_blank">
+                    <a href="https://github.com/guitaripod/lastfm-rs/blob/master/openapi.yaml" class="btn btn-primary btn-large" target="_blank">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 10px; vertical-align: middle;">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
@@ -455,9 +455,8 @@ groups, they were distinguished for their extended compositions...
                         Explore API Documentation
                     </a>
                     <p class="api-note">
-                        Available formats: 
-                        <a href="https://lastfm-proxy-worker.guitaripod.workers.dev/api/docs/openapi.json" target="_blank">JSON</a> • 
-                        <a href="https://lastfm-proxy-worker.guitaripod.workers.dev/api/docs/openapi.yaml" target="_blank">YAML</a>
+                        Interactive Swagger docs are served at <code>/api/docs</code> on your own deployment.
+                        View the <a href="https://raw.githubusercontent.com/guitaripod/lastfm-rs/master/openapi.yaml" target="_blank">OpenAPI spec</a>.
                     </p>
                 </div>
             </div>
@@ -483,12 +482,11 @@ groups, they were distinguished for their extended compositions...
                 <div class="footer-left">
                     <p>Built with Rust and Cloudflare Workers</p>
                     <p class="footer-links">
-                        <a href="https://github.com/guitaripod">Marcus Ziadé</a> · 
                         <a href="https://github.com/guitaripod/lastfm-rs/blob/master/LICENSE">MIT License</a>
                     </p>
                 </div>
                 <div class="footer-right">
-                    <a href="https://lastfm-proxy-worker.guitaripod.workers.dev/api/docs" target="_blank">API Documentation</a>
+                    <a href="https://github.com/guitaripod/lastfm-rs/blob/master/openapi.yaml" target="_blank">API Documentation</a>
                     <a href="https://github.com/guitaripod/lastfm-rs/blob/master/docs/CLI_USER_MANUAL.md">User Manual</a>
                     <a href="https://github.com/guitaripod/lastfm-rs/blob/master/docs/CLI_SHOWCASE.md">Command Showcase</a>
                     <a href="https://github.com/guitaripod/lastfm-rs/issues">Issues</a>

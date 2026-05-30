@@ -72,7 +72,26 @@ jobs:
     
     - name: Install wrangler
       run: npm install -g wrangler
-    
+
+    - name: Generate wrangler.toml from template
+      env:
+        CACHE_ID: ${{ vars.CACHE_ID }}
+        CACHE_PREVIEW_ID: ${{ vars.CACHE_PREVIEW_ID }}
+        RATE_LIMIT_ID: ${{ vars.RATE_LIMIT_ID }}
+        RATE_LIMIT_PREVIEW_ID: ${{ vars.RATE_LIMIT_PREVIEW_ID }}
+      run: |
+        if [ -z "$CACHE_ID" ] || [ -z "$RATE_LIMIT_ID" ]; then
+          echo "::error::Set repository variables CACHE_ID, CACHE_PREVIEW_ID, RATE_LIMIT_ID and RATE_LIMIT_PREVIEW_ID to enable auto-deploy."
+          exit 1
+        fi
+        cp wrangler.toml.example wrangler.toml
+        sed -i \
+          -e "s/__CACHE_ID__/${CACHE_ID}/" \
+          -e "s/__CACHE_PREVIEW_ID__/${CACHE_PREVIEW_ID}/" \
+          -e "s/__RATE_LIMIT_ID__/${RATE_LIMIT_ID}/" \
+          -e "s/__RATE_LIMIT_PREVIEW_ID__/${RATE_LIMIT_PREVIEW_ID}/" \
+          wrangler.toml
+
     - name: Deploy to Cloudflare
       env:
         CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

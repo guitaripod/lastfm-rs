@@ -24,8 +24,8 @@ This directory contains comprehensive documentation for the Last.fm CLI tool.
 ## Quick Links
 
 - [Main README](../README.md) - Project overview and getting started
+- [Self-Hosting Guide](../README.md#self-hosting) - Deploy your own Cloudflare Worker
 - [CLI Tool Binary](../target/release/lastfm-cli) - Compiled CLI executable (after building)
-- [Proxy Worker URL](https://lastfm-proxy-worker.guitaripod.workers.dev) - Production API endpoint
 
 ## Command Categories
 

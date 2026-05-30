@@ -11,8 +11,8 @@ A comprehensive command-line interface for interacting with the Last.fm API thro
 
 ```bash
 # Clone the repository
-git clone https://github.com/guitaripod/lastfm-proxy-worker.git
-cd lastfm-proxy-worker
+git clone https://github.com/guitaripod/lastfm-rs.git
+cd lastfm-rs
 
 # Build the CLI
 cargo build --release --bin lastfm-cli
@@ -23,11 +23,10 @@ cargo build --release --bin lastfm-cli
 
 ### Configuration
 
-The CLI stores its configuration at `~/.config/lastfm-cli/config.toml`. On first run, a default configuration file will be created.
+The CLI stores its configuration at `~/.config/lastfm-cli/config.toml`. On first run, a default configuration file is created with an empty `worker_url` — you must point it at the Cloudflare Worker you deployed (see the [Self-Hosting Guide](../README.md#self-hosting)) before running API commands.
 
 ```toml
-worker_url = "https://lastfm-proxy-worker.guitaripod.workers.dev"
-api_key = "REDACTED_API_KEY"  # Default API key
+worker_url = "https://your-worker.workers.dev"
 output_format = "pretty"
 cache_ttl = 3600
 interactive_history_size = 1000
@@ -37,6 +36,8 @@ request_timeout_secs = 30
 [auth]
 # Authentication details are stored here after login
 ```
+
+You can also set the backend without editing this file, via the `LASTFM_WORKER_URL` environment variable or the `--worker-url` flag (precedence: flag > env > config file).
 
 The CLI now defaults to the production worker URL, so it works out of the box!
 
@@ -1122,5 +1123,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 For issues, feature requests, or questions:
-- Open an issue on [GitHub](https://github.com/yourusername/lastfm-proxy-worker/issues)
+- Open an issue on [GitHub](https://github.com/guitaripod/lastfm-rs/issues)
 - Check the [FAQ](#troubleshooting) section above

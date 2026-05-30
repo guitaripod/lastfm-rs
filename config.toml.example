@@ -1,12 +1,12 @@
 # Last.fm CLI Configuration Template
-# Copy this file to ~/.config/lastfm-cli/config.toml and update with your settings
+# Copy this file to ~/.config/lastfm-cli/config.toml and update with your settings.
 
-# Worker URL - The Last.fm proxy worker endpoint
-worker_url = "https://lastfm-proxy-worker.guitaripod.workers.dev"
-
-# API Key - Your Last.fm API key (optional if using the proxy's default key)
-# Get your own at: https://www.last.fm/api/account/create
-api_key = "YOUR_API_KEY_HERE"
+# Worker URL - REQUIRED. The Last.fm proxy worker you deployed yourself.
+# The CLI ships with no default backend; it will not talk to anyone else's worker.
+# Deploy your own (see https://github.com/guitaripod/lastfm-rs#self-hosting), then
+# set it here, or override per-invocation with the LASTFM_WORKER_URL env var or the
+# --worker-url flag.
+worker_url = ""
 
 # Default output format: json, table, pretty, compact
 output_format = "pretty"

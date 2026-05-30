@@ -21,9 +21,16 @@ async fn main() -> Result<()> {
     let config_manager = ConfigManager::new()?;
     let mut config = config_manager.load().await?;
 
-    // Override with command line options
-    if let Some(url) = matches.get_one::<String>("worker-url") {
-        config.worker_url = url.clone();
+    config.worker_url =
+        resolve_worker_url(config.worker_url, matches.get_one::<String>("worker-url"));
+
+    if config.worker_url.trim().is_empty() {
+        if let Some((category, _)) = matches.subcommand() {
+            if category != "config" {
+                eprintln!("{}", worker_not_configured_message());
+                std::process::exit(1);
+            }
+        }
     }
 
     if let Some(output) = matches.get_one::<String>("output") {
@@ -56,9 +63,36 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+/// Resolves the backend worker URL using the precedence
+/// `--worker-url` flag > `LASTFM_WORKER_URL` env var > stored config value.
+fn resolve_worker_url(config_value: String, flag: Option<&String>) -> String {
+    if let Some(flag_url) = flag {
+        return flag_url.clone();
+    }
+
+    if let Ok(env_url) = std::env::var("LASTFM_WORKER_URL") {
+        if !env_url.trim().is_empty() {
+            return env_url.trim().to_string();
+        }
+    }
+
+    config_value
+}
+
+/// Guidance shown when no worker backend has been configured yet.
+fn worker_not_configured_message() -> String {
+    "Error: no Last.fm worker backend is configured.\n\n\
+     lastfm-cli talks to a Cloudflare Worker that you host yourself. Deploy one\n\
+     (see https://github.com/guitaripod/lastfm-rs#self-hosting), then point the CLI at it:\n\n\
+     \x20\x20export LASTFM_WORKER_URL=https://your-worker.workers.dev\n\
+     \x20\x20# or persist it:\n\
+     \x20\x20lastfm-cli config set worker_url https://your-worker.workers.dev"
+        .to_string()
+}
+
 fn build_cli() -> Command {
     Command::new("lastfm-cli")
-        .version("1.0.0")
+        .version(env!("CARGO_PKG_VERSION"))
         .author("Last.fm Proxy Worker CLI")
         .about("Command-line interface for Last.fm Proxy Worker")
         .arg_required_else_help(true)
@@ -86,6 +120,28 @@ fn build_cli() -> Command {
         .subcommand(build_library_command())
         .subcommand(build_auth_command())
         .subcommand(build_my_command())
+        .subcommand(build_config_command())
+}
+
+fn build_config_command() -> Command {
+    Command::new("config")
+        .about("Manage CLI configuration")
+        .subcommand(
+            Command::new("set")
+                .about("Set a configuration value")
+                .arg(
+                    Arg::new("key")
+                        .help("Config key (e.g. worker_url)")
+                        .required(true),
+                )
+                .arg(Arg::new("value").help("Config value").required(true)),
+        )
+        .subcommand(
+            Command::new("get")
+                .about("Get a configuration value")
+                .arg(Arg::new("key").help("Config key").required(true)),
+        )
+        .subcommand(Command::new("list").about("List all configuration values"))
 }
 
 fn build_artist_command() -> Command {

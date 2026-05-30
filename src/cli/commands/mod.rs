@@ -209,6 +209,15 @@ impl CommandRegistry {
             config_manager.clone(),
         )));
 
+        // Register configuration commands
+        registry.register(Box::new(config::SetConfigCommand::new(
+            config_manager.clone(),
+        )));
+        registry.register(Box::new(config::GetConfigCommand::new(
+            config_manager.clone(),
+        )));
+        registry.register(Box::new(config::ListConfigCommand::new(config_manager)));
+
         registry
     }
 }

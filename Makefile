@@ -1,4 +1,4 @@
-.PHONY: build install test deploy cli worker help
+.PHONY: build install test test-worker deploy cli worker help
 
 # Default target
 help:
@@ -7,7 +7,8 @@ help:
 	@echo "  make worker     - Build only the worker"
 	@echo "  make cli        - Build only the CLI"
 	@echo "  make install    - Install the CLI tool locally"
-	@echo "  make test       - Run all tests"
+	@echo "  make test       - Run unit tests"
+	@echo "  make test-worker - Smoke-test a running worker (WORKER_URL, default localhost:8787)"
 	@echo "  make deploy     - Deploy worker to Cloudflare"
 	@echo "  make dev        - Run worker in development mode"
 	@echo "  make logs       - Tail worker logs"
@@ -36,8 +37,10 @@ install: cli
 test:
 	@echo "Running unit tests..."
 	@cargo test
-	@echo "Running endpoint tests..."
-	@./test_endpoints.sh
+
+# Smoke-test a running worker (set WORKER_URL, defaults to http://localhost:8787)
+test-worker:
+	@./scripts/test_worker.sh
 
 # Deploy to Cloudflare
 deploy: worker

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WORKER_URL="https://lastfm-proxy-worker.guitaripod.workers.dev"
+WORKER_URL="${WORKER_URL:-http://localhost:8787}"
 
 echo "Testing Last.fm Proxy Worker"
 echo "============================"

@@ -44,8 +44,10 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://lastfm-proxy-worker.guitaripod.workers.dev
-    description: Production API
+  - url: https://your-worker.workers.dev
+    description: Your self-hosted Cloudflare Worker (replace with your own deployment URL)
+  - url: http://localhost:8787
+    description: Local development (wrangler dev)
 
 tags:
   - name: Artist

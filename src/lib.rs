@@ -67,8 +67,12 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
             }
         })
         // Legacy endpoint for backwards compatibility
-        .get("/openapi", |_, _| {
-            Response::redirect("https://lastfm-proxy-worker.guitaripod.workers.dev/api/docs/openapi.yaml".parse().unwrap())
+        .get("/openapi", |req, _| {
+            let target = req
+                .url()?
+                .join("/api/docs/openapi.yaml")
+                .map_err(|e| worker::Error::from(e.to_string()))?;
+            Response::redirect(target)
         })
         // Artist endpoints
         .get_async("/artist/getCorrection", artist::get_correction)

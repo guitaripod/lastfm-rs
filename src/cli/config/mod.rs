@@ -14,6 +14,7 @@ use crate::cli::{
 
 /// CLI configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct CliConfig {
     pub worker_url: String,
     pub output_format: OutputFormat,
@@ -28,7 +29,7 @@ pub struct CliConfig {
 impl Default for CliConfig {
     fn default() -> Self {
         Self {
-            worker_url: "https://lastfm-proxy-worker.guitaripod.workers.dev".to_string(),
+            worker_url: String::new(),
             output_format: OutputFormat::Pretty,
             cache_ttl: 3600,
             interactive_history_size: 1000,
@@ -106,12 +107,6 @@ impl Configurable for ConfigManager {
     }
 
     fn validate(&self, config: &Self::Config) -> Result<()> {
-        // Validate worker URL
-        if config.worker_url.is_empty() {
-            return Err(CliError::validation("Worker URL cannot be empty"));
-        }
-
-        // Validate timeout
         if config.request_timeout_secs == 0 {
             return Err(CliError::validation(
                 "Request timeout must be greater than 0",
@@ -245,10 +240,7 @@ mod tests {
         let mut config = CliConfig::default();
 
         // Test getting values
-        assert_eq!(
-            config.get_value(ConfigField::WorkerUrl),
-            "https://lastfm-proxy-worker.guitaripod.workers.dev"
-        );
+        assert_eq!(config.get_value(ConfigField::WorkerUrl), "");
         assert_eq!(config.get_value(ConfigField::CacheTtl), "3600");
 
         // Test setting values
@@ -265,5 +257,38 @@ mod tests {
         assert!(config
             .set_value(ConfigField::OutputFormat, "invalid")
             .is_err());
+    }
+
+    #[test]
+    fn test_validate_allows_empty_worker_url_and_rejects_zero() {
+        let manager = ConfigManager::new().unwrap();
+
+        let unconfigured = CliConfig::default();
+        assert!(unconfigured.worker_url.is_empty());
+        assert!(manager.validate(&unconfigured).is_ok());
+
+        let zero_timeout = CliConfig {
+            request_timeout_secs: 0,
+            ..CliConfig::default()
+        };
+        assert!(manager.validate(&zero_timeout).is_err());
+
+        let zero_ttl = CliConfig {
+            cache_ttl: 0,
+            ..CliConfig::default()
+        };
+        assert!(manager.validate(&zero_ttl).is_err());
+    }
+
+    #[test]
+    fn test_partial_config_uses_defaults_for_missing_fields() {
+        let partial = "worker_url = \"https://partial.worker.dev\"\noutput_format = \"json\"\n";
+        let config: CliConfig = toml::from_str(partial).unwrap();
+
+        assert_eq!(config.worker_url, "https://partial.worker.dev");
+        assert_eq!(config.get_value(ConfigField::OutputFormat), "json");
+        assert!(config.color_output);
+        assert_eq!(config.request_timeout_secs, 30);
+        assert_eq!(config.cache_ttl, 3600);
     }
 }

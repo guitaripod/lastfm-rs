@@ -52,7 +52,7 @@ https://www.last.fm/api/auth/?api_key=REDACTED_API_KEY&cb=http://localhost:8080/
 After authorizing, you'll be redirected to a page showing an auth token.
 Please enter the token here:
 Token: [user enters token]
-✓ Successfully authenticated as 'guitaripod'
+✓ Successfully authenticated as 'rj'
 ```
 
 ### 3. Auth Status (Logged In)
@@ -66,7 +66,7 @@ Output:
 ```json
 {
   "authenticated": true,
-  "username": "guitaripod"
+  "username": "rj"
 }
 ```
 
@@ -90,7 +90,7 @@ Successfully logged out
 
 ## Personal Commands (My)
 
-These commands work only when authenticated (as guitaripod) and automatically use your username.
+These commands work only when authenticated (as rj) and automatically use your username.
 
 ### 1. My Info
 Get your own profile information.
@@ -106,9 +106,9 @@ Response time: 1405ms | Cache: MISS | API calls: 1
 +------+--------------------------------------+
 | Key  | Value                                |
 +------+--------------------------------------+
-| Name | guitaripod                          |
+| Name | rj                                   |
 +------+--------------------------------------+
-| Real | Marcus                               |
+| Real | RJ                                   |
 | Name |                                      |
 +------+--------------------------------------+
 | Play | 151049                               |
@@ -122,7 +122,7 @@ Response time: 1405ms | Cache: MISS | API calls: 1
 +------+--------------------------------------+
 | Since   | Apr 2010                          |
 +------+--------------------------------------+
-| URL  | https://www.last.fm/user/guitaripod |
+| URL  | https://www.last.fm/user/rj          |
 +------+--------------------------------------+
 ```
 
@@ -926,8 +926,7 @@ Similar Artists:
 The CLI configuration is stored at `~/.config/lastfm-cli/config.toml`:
 
 ```toml
-worker_url = "https://lastfm-proxy-worker.guitaripod.workers.dev"
-api_key = "REDACTED_API_KEY"
+worker_url = "https://your-worker.workers.dev"
 output_format = "pretty"
 cache_ttl = 3600
 interactive_history_size = 1000
@@ -1036,4 +1035,4 @@ The Last.fm CLI provides comprehensive access to the Last.fm API with 32 command
 - **User Commands** (3): info, recent-tracks, top-artists
 - **Library Commands** (1): artists
 
-All commands support multiple output formats (table, json, compact, pretty), optional parameters, and work with the production proxy at https://lastfm-proxy-worker.guitaripod.workers.dev. When authenticated as guitaripod, the personal "my" commands provide quick access to your own Last.fm data without needing to specify your username.
+All commands support multiple output formats (table, json, compact, pretty) and optional parameters, and run against the Cloudflare Worker you self-host (configured via `worker_url`). Once authenticated, the personal "my" commands provide quick access to your own Last.fm data without needing to specify your username.

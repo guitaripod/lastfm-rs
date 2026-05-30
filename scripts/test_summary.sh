@@ -4,6 +4,7 @@
 # Shows a quick overview of all working features
 
 CLI="./target/release/lastfm-cli"
+WORKER_URL="${WORKER_URL:-http://localhost:8787}"
 
 echo "Last.fm CLI & Worker Test Summary"
 echo "================================="
@@ -11,10 +12,10 @@ echo ""
 
 # Check Worker Health
 echo "🌐 Cloudflare Worker Status:"
-if curl -s https://lastfm-proxy-worker.guitaripod.workers.dev/health | grep -q "OK"; then
-    echo "   ✅ Worker is healthy at https://lastfm-proxy-worker.guitaripod.workers.dev"
+if curl -s "$WORKER_URL/health" | grep -q "OK"; then
+    echo "   ✅ Worker is healthy at $WORKER_URL"
 else
-    echo "   ❌ Worker is down"
+    echo "   ❌ Worker is down at $WORKER_URL"
 fi
 
 # Check CLI Version
