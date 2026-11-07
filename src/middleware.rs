@@ -2,7 +2,7 @@ use crate::error::{ApiError, ApiResult};
 use crate::models::rate_limit_key;
 use crate::utils::{get_client_ip, validate_signature};
 use std::collections::HashMap;
-use worker::{Env, Request, Response};
+use worker::{Env, RateLimiter, Request, Response};
 
 // Add CORS headers to response
 pub fn add_cors_headers(mut response: Response) -> Result<Response, worker::Error> {
@@ -19,57 +19,29 @@ pub fn add_cors_headers(mut response: Response) -> Result<Response, worker::Erro
 }
 
 // Rate limiting middleware
+/// Allows each client IP 100 requests a minute, counted by the `RATE_LIMITER` binding instead of
+/// a KV read and write per request. A deployment without the binding refuses requests, so an
+/// outdated wrangler.toml cannot run unlimited; a limiter outage lets the request through.
 pub async fn rate_limit(req: &Request, env: &Env) -> ApiResult<()> {
-    let ip = get_client_ip(req);
-    let key = rate_limit_key(&ip);
-
-    let kv = match env.kv("RATE_LIMIT") {
-        Ok(kv) => kv,
+    let key = rate_limit_key(&get_client_ip(req));
+    let limiter = match env.get_binding::<RateLimiter>("RATE_LIMITER") {
+        Ok(limiter) => limiter,
         Err(e) => {
-            worker::console_log!("Failed to get RATE_LIMIT KV: {:?}", e);
+            worker::console_error!(
+                "RATE_LIMITER binding missing, add the [[ratelimits]] block from wrangler.toml.example: {:?}",
+                e
+            );
             return Err(ApiError::temporary_error());
         }
     };
-
-    // Get current count
-    worker::console_log!("Getting rate limit for key: {}", key);
-    let count = match kv.get(&key).text().await {
-        Ok(Some(count_str)) => {
-            worker::console_log!("Current count: {}", count_str);
-            count_str.parse::<u32>().unwrap_or(0)
-        }
-        Ok(None) => {
-            worker::console_log!("No existing count");
-            0
-        }
+    match limiter.limit(key).await {
+        Ok(outcome) if outcome.success => Ok(()),
+        Ok(_) => Err(ApiError::rate_limit_exceeded()),
         Err(e) => {
-            worker::console_log!("Error getting count: {:?}", e);
-            0
-        }
-    };
-
-    // Check rate limit (100 requests per minute)
-    if count >= 100 {
-        return Err(ApiError::rate_limit_exceeded());
-    }
-
-    // Increment counter
-    worker::console_log!("Incrementing counter to {}", count + 1);
-    match kv.put(&key, (count + 1).to_string()) {
-        Ok(builder) => match builder.expiration_ttl(60).execute().await {
-            Ok(_) => worker::console_log!("Rate limit updated successfully"),
-            Err(e) => {
-                worker::console_log!("Failed to update rate limit: {:?}", e);
-                return Err(ApiError::temporary_error());
-            }
-        },
-        Err(e) => {
-            worker::console_log!("Failed to create put builder: {:?}", e);
-            return Err(ApiError::temporary_error());
+            worker::console_log!("Rate limiter failed: {:?}", e);
+            Ok(())
         }
     }
-
-    Ok(())
 }
 
 // Request validation middleware

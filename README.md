@@ -6,14 +6,14 @@ A blazing-fast Rust-based Last.fm SDK for Cloudflare Workers and a feature-rich 
 
 - **🔐 Full Authentication Support** - Access your personal Last.fm data (loved tracks, recent plays, top artists)
 - **🚀 High Performance** - Built with Rust for optimal speed and efficiency
-- **💾 Smart Caching** - KV-based caching with intelligent TTL management
-- **🛡️ Rate Limiting** - Built-in protection against API abuse
+- **💾 Smart Caching** - Edge caching through the Cache API with intelligent TTL management
+- **🛡️ Rate Limiting** - Per-IP limits through Cloudflare's rate limiting binding, so no request writes to Workers KV
 - **📊 31+ Commands** - Comprehensive coverage across 10 categories
 - **🎨 Multiple Output Formats** - JSON, table, pretty-print, and compact modes
 
 ## ⚠️ This project is self-hosted
 
-lastfm-rs ships with **no backend**. The CLI talks to a Cloudflare Worker that **you deploy and own** — your Last.fm API key, your KV cache, your rate limits, your users' data. There is no shared or default endpoint baked in. Deploy the worker first, then point the CLI at it.
+lastfm-rs ships with **no backend**. The CLI talks to a Cloudflare Worker that **you deploy and own** — your Last.fm API key, your cache, your rate limits, your users' data. There is no shared or default endpoint baked in. Deploy the worker first, then point the CLI at it.
 
 ## 🏠 Self-Hosting
 
@@ -29,27 +29,25 @@ lastfm-rs ships with **no backend**. The CLI talks to a Cloudflare Worker that *
 git clone https://github.com/guitaripod/lastfm-rs
 cd lastfm-rs
 
-# Creates KV namespaces, writes their IDs into wrangler.toml, and sets your secrets
+# Creates wrangler.toml from the template and sets your secrets
 ./scripts/setup-worker.sh
 
 wrangler deploy
 ```
 
-`setup-worker.sh` copies `wrangler.toml.example` to `wrangler.toml`, creates the `CACHE` and `RATE_LIMIT` KV namespaces (production + preview), fills in their IDs, and prompts for the two required secrets:
+`setup-worker.sh` copies `wrangler.toml.example` to `wrangler.toml` and prompts for the two required secrets. The worker needs no KV namespaces: responses are cached in the edge Cache API and the per-IP limit is a [rate limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/), both free and outside the Workers KV free tier's 1,000 writes a day.
 
 | Secret | Required | Purpose |
 | --- | --- | --- |
 | `LASTFM_API_KEY` | yes | Your Last.fm API key |
 | `LASTFM_API_SECRET` | yes | Your Last.fm shared secret, used to sign authenticated requests server-side |
 
+Upgrading from a version that used KV? Replace the `CACHE` and `RATE_LIMIT` `[[kv_namespaces]]` blocks in your `wrangler.toml` with the `[[ratelimits]]` block from `wrangler.toml.example` (or rerun `setup-worker.sh` and let it overwrite the file). Without the `RATE_LIMITER` binding the worker answers every request with an error.
+
 Prefer to do it by hand? See [`wrangler.toml.example`](wrangler.toml.example), then:
 
 ```bash
-wrangler kv namespace create CACHE
-wrangler kv namespace create CACHE --preview
-wrangler kv namespace create RATE_LIMIT
-wrangler kv namespace create RATE_LIMIT --preview
-# paste the four IDs into wrangler.toml
+cp wrangler.toml.example wrangler.toml
 wrangler secret put LASTFM_API_KEY
 wrangler secret put LASTFM_API_SECRET
 wrangler deploy
@@ -57,10 +55,9 @@ wrangler deploy
 
 ### Continuous deployment (optional)
 
-The included GitHub Actions workflow auto-deploys on push to `master`. Because `wrangler.toml` is gitignored (it holds your namespace IDs), CI rebuilds it from `wrangler.toml.example`. Add these to your repository so it can:
+The included GitHub Actions workflow auto-deploys on push to `master`, building `wrangler.toml` from `wrangler.toml.example`. Add this to your repository so it can:
 
 - Secret `CLOUDFLARE_API_TOKEN`
-- Variables `CACHE_ID`, `CACHE_PREVIEW_ID`, `RATE_LIMIT_ID`, `RATE_LIMIT_PREVIEW_ID`
 
 ## 🚀 Using the CLI
 

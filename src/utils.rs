@@ -1,6 +1,6 @@
 use crate::error::{ApiError, ApiResult};
 use std::collections::HashMap;
-use worker::{console_error, console_log, Env, Error, Headers, Request, Response, Url};
+use worker::{console_error, console_log, Cache, Env, Error, Headers, Request, Response, Url};
 
 // Extract client IP from request
 pub fn get_client_ip(req: &Request) -> String {
@@ -84,33 +84,33 @@ pub async fn proxy_to_lastfm(
     Ok(response)
 }
 
-// Cache response in KV
-pub async fn cache_response(
-    env: &Env,
-    cache_key: &str,
-    response_body: &str,
-    ttl: u64,
-) -> Result<(), Error> {
-    let kv = env.kv("CACHE")?;
-
-    kv.put(cache_key, response_body)?
-        .expiration_ttl(ttl)
-        .execute()
-        .await
-        .map_err(|e| Error::from(e.to_string()))?;
-
-    // Buffer synchronization complete
-    Ok(())
+/// The edge cache stores responses under URLs, so a call's cache key rides in the query of one.
+fn cache_url(cache_key: &str) -> Result<Url, Error> {
+    let mut url = Url::parse("https://lastfm-proxy.cache/")?;
+    url.query_pairs_mut().append_pair("key", cache_key);
+    Ok(url)
 }
 
-// Get cached response from KV
-pub async fn get_cached_response(env: &Env, cache_key: &str) -> Result<Option<String>, Error> {
-    let kv = env.kv("CACHE")?;
-
-    kv.get(cache_key)
-        .text()
+// Cache response in the data center's edge cache, which unlike KV has no daily write limit
+pub async fn cache_response(cache_key: &str, response_body: &str, ttl: u64) -> Result<(), Error> {
+    let mut response = Response::ok(response_body)?;
+    let headers = response.headers_mut();
+    headers.set("Content-Type", "application/json")?;
+    headers.set("Cache-Control", &format!("public, max-age={ttl}"))?;
+    Cache::default()
+        .put(cache_url(cache_key)?.as_str(), response)
         .await
-        .map_err(|e| Error::from(e.to_string()))
+}
+
+// Get cached response from the edge cache
+pub async fn get_cached_response(cache_key: &str) -> Result<Option<String>, Error> {
+    match Cache::default()
+        .get(cache_url(cache_key)?.as_str(), false)
+        .await?
+    {
+        Some(mut response) => Ok(Some(response.text().await?)),
+        None => Ok(None),
+    }
 }
 
 // Validate request signature (for iOS app)

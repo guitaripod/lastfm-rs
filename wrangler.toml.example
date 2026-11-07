@@ -1,8 +1,8 @@
 # wrangler.toml.example — template for self-hosting the lastfm-rs worker.
 #
-# Do not put your real IDs here. Run ./scripts/setup-worker.sh, which copies this
-# file to wrangler.toml (gitignored) and fills in the KV namespace IDs it creates.
-# Then add your secrets and deploy:
+# Run ./scripts/setup-worker.sh, which copies this file to wrangler.toml (gitignored)
+# and asks for your secrets, then deploy. By hand:
+#   cp wrangler.toml.example wrangler.toml
 #   wrangler secret put LASTFM_API_KEY
 #   wrangler secret put LASTFM_API_SECRET
 #   wrangler deploy
@@ -18,21 +18,30 @@ command = "bash scripts/build-worker.sh"
 ENVIRONMENT = "production"
 LASTFM_API_BASE_URL = "http://ws.audioscrobbler.com/2.0/"
 
-[[kv_namespaces]]
-binding = "CACHE"
-id = "__CACHE_ID__"
-preview_id = "__CACHE_PREVIEW_ID__"
-
-[[kv_namespaces]]
-binding = "RATE_LIMIT"
-id = "__RATE_LIMIT_ID__"
-preview_id = "__RATE_LIMIT_PREVIEW_ID__"
+# 100 requests a minute per client IP. Cloudflare's rate limiting binding is free and keeps
+# the worker clear of the Workers KV free tier's 1,000 writes a day; responses are cached in
+# the edge Cache API for the same reason. namespace_id is any positive integer unique to your
+# account.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "4201"
+simple = { limit = 100, period = 60 }
 
 [env.preview]
-vars = { ENVIRONMENT = "preview" }
+vars = { ENVIRONMENT = "preview", LASTFM_API_BASE_URL = "http://ws.audioscrobbler.com/2.0/" }
+
+[[env.preview.ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "4202"
+simple = { limit = 100, period = 60 }
 
 [env.staging]
-vars = { ENVIRONMENT = "staging" }
+vars = { ENVIRONMENT = "staging", LASTFM_API_BASE_URL = "http://ws.audioscrobbler.com/2.0/" }
+
+[[env.staging.ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "4203"
+simple = { limit = 100, period = 60 }
 
 [observability]
 enabled = true

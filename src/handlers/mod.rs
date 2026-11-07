@@ -55,7 +55,7 @@ pub async fn handle_request(
 
     // Check cache
     console_log!("Checking cache...");
-    match get_cached_response(&env, &cache_key).await {
+    match get_cached_response(&cache_key).await {
         Ok(Some(cached)) => {
             console_log!("Cache hit for key: {}", cache_key);
             let mut response = Response::ok(cached)?;
@@ -97,7 +97,7 @@ pub async fn handle_request(
     // Cache successful responses for 1 hour
     if response.status_code() == 200 {
         let cache_ttl = 3600; // 1 hour
-        let _ = cache_response(&env, &cache_key, &response_body, cache_ttl).await;
+        let _ = cache_response(&cache_key, &response_body, cache_ttl).await;
     }
 
     // Return response

@@ -8,7 +8,7 @@ info:
     ## 🚀 Features
     
     - **Blazing Fast**: Built with Rust for optimal performance
-    - **Smart Caching**: KV-based response caching with intelligent TTL
+    - **Smart Caching**: edge Cache API response caching with intelligent TTL
     - **Rate Limiting**: Built-in protection against API abuse  
     - **CORS Support**: Ready for browser-based applications
     - **Full Coverage**: Supports 40+ Last.fm API methods
